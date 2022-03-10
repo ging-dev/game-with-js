@@ -6,6 +6,8 @@ let werewolf;
 /** @type { Phaser.Types.Input.Keyboard.CursorKeys } */
 let cursors;
 
+let isDead = false;
+
 class Scene extends Phaser.Scene
 {
   constructor()
@@ -31,7 +33,6 @@ class Scene extends Phaser.Scene
       key: 'death',
       frames: this.anims.generateFrameNames('werewolf', {start: 1, end: 10, prefix: 'death-'}),
       frameRate: 5,
-      repeat: -1,
     });
 
     this.anims.create({
@@ -56,6 +57,10 @@ class Scene extends Phaser.Scene
 
   update()
   {
+    if (isDead) {
+      return;
+    }
+
     if (cursors.up.isDown && werewolf.body.onFloor()) {
       if (werewolf.anims.getFrameName() == 'jump-4') {
         werewolf.setVelocityY(-400);
@@ -77,6 +82,11 @@ class Scene extends Phaser.Scene
           werewolf.play('idle', true).setGravityY(0);
         }
       }
+    }
+
+    if (cursors.space.isDown) {
+      werewolf.play('death', true);
+      isDead = true;
     }
   }
 }
