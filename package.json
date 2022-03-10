@@ -19,5 +19,8 @@
   "homepage": "https://github.com/ging-dev/game-with-js#readme",
   "devDependencies": {
     "laravel-mix": "^6.0.43"
+  },
+  "dependencies": {
+    "phaser": "^3.55.2"
   }
 }
