@@ -14,11 +14,12 @@ class SimpleGame extends Phaser.Scene {
     this.score = 0;
     this.scoreText = null;
     this.canMove = true;
+    this.heath = 3;
+    this.heathBar = null;
   }
 
   preload() {
     this.load.image('sky', 'images/sky.png');
-    this.load.image('ground', 'images/platform.png');
     this.load.image('road', 'images/road.png');
     this.load.image('bridge', 'images/bridge.png');
     this.load.image('star', 'images/star.png');
@@ -117,7 +118,7 @@ class SimpleGame extends Phaser.Scene {
       .setFlipX(true)
       .play('girl-walk')
       .on('animationupdate', () => {
-        if (!hasKiss) {
+        if (!hasKiss && this.heath > 0) {
           let distance = Phaser.Math.Distance.Between(this.player.x, this.player.y, girl.x, girl.y);
           if (distance < 10) {
             this.canMove = false;
@@ -131,6 +132,10 @@ class SimpleGame extends Phaser.Scene {
             girl.setVelocityX(0);
             girl.play('girl-kiss', true).on('animationcomplete', () => {
               this.canMove = true;
+              if (this.heath < 3) {
+                ++this.heath;
+                this.heathBar.setText('Heath:' + this.heath);
+              }
               hasKiss = true;
               girl.play('girl-walk').setVelocityX(girl.flipX ? 100 : -100);
             });
@@ -169,6 +174,7 @@ class SimpleGame extends Phaser.Scene {
     this.physics.add.collider(this.player, this.bombs, this.hitBomb, null, this);
 
     this.scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    this.heathBar = this.add.text(500, 16, 'Heath:' + this.heath, { fontSize: '32px', fill: '#000' });
   }
 
   /**
@@ -197,13 +203,23 @@ class SimpleGame extends Phaser.Scene {
   }
 
   hitBomb(player, bomb) {
-    this.canMove = false;
-    this.player.play('die', true).setVelocityX(0);
-    // player.setTint(0xff0000);
+    if (this.heath > 0) {
+      this.player.setFrame('die-1');
+      --this.heath;
+      this.heathBar.setText('Heath:' + this.heath);
+    } else {
+      if (this.player.state === 'die' ) {
+        return;
+      }
+
+      this.player.play('die', true).setVelocityX(0);
+      this.player.state = 'die';
+      // player.setTint(0xff0000);
+    }
   }
 
   update() {
-    if (!this.canMove) {
+    if (!this.canMove || this.player.state === 'die') {
       return;
     }
 
